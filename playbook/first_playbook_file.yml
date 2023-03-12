@@ -1,0 +1,138 @@
+---
+ - hosts: webservers
+   # remote_user: ec2-user
+   remote_user: root
+   
+
+   become: yes
+   vars_prompt:
+
+     - name: trello_api_token
+       prompt: What is your trello api token?
+
+     - name: trello_api_key
+       prompt: what is your trello api key?
+
+     - name: trello_board_id
+       prompt: what is your trello board id?
+
+
+
+
+   tasks:
+
+    #########################################     
+    # Install Git 
+    #########################################     
+     - name: Install git
+       ansible.builtin.apt:
+           name: git
+           state: present
+           update_cache: yes
+
+    #########################################     
+    # Install yum
+    #########################################     
+     - name: Install yum
+       ansible.builtin.apt:
+           name: yum
+           state: present
+           update_cache: yes
+
+
+    #########################################     
+    # Install depdenceies and Python 3.10
+    #########################################     
+    #  - name: Install Dependencies
+    #    #ansible.builtin.yum:
+    #    yum:
+    #       name:
+    #         # - '*'
+    #         # - "@Development tools"
+    #         - libffi-devel
+    #         - bzip2-devel
+    #         - wget
+    #         - openssl11-devel
+    #       state: present
+    #       use_backend : yum 
+
+     - name: Download unzip and cd
+       unarchive:
+         src: http://www.python.org/ftp/python/3.10.2/Python-3.10.2.tgz
+         dest: /tmp/
+         remote_src: yes
+         mode: "0755"
+
+     - name: Go to the folder
+       command: chdir=/tmp/Python-3.10.2 ls
+     - name: run configuration optimization
+       command: /tmp/Python-3.10.2/configure --enable-optimizations
+     #- name: run alt install
+     #  command: make altinstall
+
+    #########################################     
+    # install Poetry
+    #########################################     
+     - name: install poetry
+       #shell: curl -sSL https://install.python-poetry.org | POETRY_HOME=/etc/poetry /usr/local/bin/python3.10 -
+       shell: curl -sSL https://install.python-poetry.org | POETRY_HOME=/etc/poetry python3 -
+       args:
+         executable: /bin/bash
+
+    #########################################     
+    # Create directory for todoapp
+    #########################################     
+     - name: create directory /opt/todoapp
+       file:
+         path: /opt/todoapp
+         state: directory
+         #group: ec2-user
+         #owner: ec2-user
+         owner: root
+         group: root         
+         mode: '0777'
+
+
+    #########################################     
+    # Get the latest version fo the code from Git
+    #########################################     
+     - name: Checkout a todo project from git repo
+       git:
+         repo: 'https://gitlab.com/terrycheng925/DevOps.git'
+         dest: /opt/todoapp
+         version: main
+
+     - name: change to /opt/todoapp
+       command: chdir=/opt/todoapp/Mod4_Ex ls
+       register: chdir_todoapp
+
+     - debug: var=chdir_todoapp.stdout_lines
+
+
+    #########################################     
+    # install project dependence 
+    #########################################     
+     - name: run poetry install
+       become_user: root
+       shell: /etc/poetry/bin/poetry install
+       register: poetry_install_result
+       args:
+          chdir: /opt/todoapp/Mod4_Ex
+          executable: /bin/bash
+
+    #########################################     
+    # create a .env file with some input ###
+    #########################################     
+     - debug:
+        msg: 'You input trello_api_token {{ trello_api_token }} , trello_api_key {{ trello_api_key }} , this for testing only {{ trello_board_id }}'
+
+     - name: Template a file to env
+       template:
+         src: ./template/env.j2
+         dest: /opt/todoapp/Mod4_Ex/.env
+         owner: root #ec2-user
+         group: root #ec2-user
+         mode: '0777'
+
+
+
