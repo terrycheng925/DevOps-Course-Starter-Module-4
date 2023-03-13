@@ -65,8 +65,8 @@
 
      - name: Go to the folder
        command: chdir=/tmp/Python-3.10.2 ls
-     - name: run configuration optimization
-       command: /tmp/Python-3.10.2/configure --enable-optimizations
+     #- name: run configuration optimization
+     #  command: /tmp/Python-3.10.2/configure --enable-optimizations
      #- name: run alt install
      #  command: make altinstall
 
