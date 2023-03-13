@@ -4,7 +4,7 @@
    #remote_user: root
    
 
-   become: yes
+   #become: yes
    vars_prompt:
 
      - name: trello_api_token
