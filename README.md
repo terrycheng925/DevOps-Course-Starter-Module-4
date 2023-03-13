@@ -46,7 +46,7 @@ The `.env` file is used by flask to set environment variables when running `flas
 2. Gengerated API Key and Token.
    
    #### To get a board id, use post man or curl command, e.g. https://api.trello.com/1/members/me/boards?fields=name,url&key={{APIKey}}&token={{APIToken}}
-3. Update the .env file with this entries, example as : 
+3. update the .env file with this entries, example as : 
 
     `TRELLO_API_KEY=`xxxxxxxx1234
 
