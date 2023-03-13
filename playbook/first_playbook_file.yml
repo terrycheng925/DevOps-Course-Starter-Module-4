@@ -61,6 +61,7 @@
          src: http://www.python.org/ftp/python/3.10.2/Python-3.10.2.tgz
          dest: /tmp/
          remote_src: yes
+         become: yes
          mode: "0755"
 
      - name: Go to the folder
